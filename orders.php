@@ -67,7 +67,7 @@ try {
         $items = $input['items'] ?? ($_POST['items'] ?? null);
         $total = $input['total'] ?? ($_POST['total'] ?? 0);
         $userId = $input['userId'] ?? ($_POST['userId'] ?? null);
-        $loyalPassword = $input['loyal_password'] ?? $input['redeem_code'] ?? ($_POST['loyal_password'] ?? $_POST['redeem_code'] ?? null);
+        $redeemCode = trim($input['redeem_code'] ?? ($_POST['redeem_code'] ?? ''));
         $userEmail = $input['userEmail'] ?? ($_POST['userEmail'] ?? null);
 
         // Parse items if it's a JSON string
@@ -85,11 +85,23 @@ try {
         $itemsJson = json_encode($items);
         $status = 'Pending';
 
-        // Check loyalty password if provided and compute final price
+        // Enforce daily order cap of 20 orders
+        $orderDate = date('Y-m-d');
+        $countStmt = $conn->prepare("SELECT COUNT(*) AS total_orders FROM orders WHERE DATE(created_at) = ? AND status <> 'Cancelled'");
+        $countStmt->bind_param('s', $orderDate);
+        $countStmt->execute();
+        $countResult = $countStmt->get_result()->fetch_assoc();
+        $countStmt->close();
+        if ((int)$countResult['total_orders'] >= 20) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Daily order limit reached for ' . $orderDate]);
+            exit();
+        }
+
+        // Check loyalty redeem code if provided and compute final price
         $finalPrice = $total;
         $appliedDiscount = 0;
-        if ($loyalPassword) {
-            // Determine email to check against loyal_customers
+        if ($redeemCode) {
             if (!$userEmail && $userId) {
                 $uStmt = $conn->prepare('SELECT email FROM users WHERE id = ?');
                 $uStmt->bind_param('s', $userId);
@@ -100,19 +112,26 @@ try {
                 }
                 $uStmt->close();
             }
-            if ($userEmail) {
-                $lStmt = $conn->prepare('SELECT password_hash FROM loyal_customers WHERE email = ?');
-                $lStmt->bind_param('s', $userEmail);
-                $lStmt->execute();
-                $lRes = $lStmt->get_result();
-                if ($lRow = $lRes->fetch_assoc()) {
-                    if (password_verify($loyalPassword, $lRow['password_hash'])) {
-                        $appliedDiscount = 10; // percent
-                        $finalPrice = round($total * 0.9, 2);
-                    }
+
+            $lStmt = $conn->prepare('SELECT email FROM loyal_customers WHERE redeem_code = ?');
+            $lStmt->bind_param('s', $redeemCode);
+            $lStmt->execute();
+            $lRes = $lStmt->get_result();
+            if ($lRow = $lRes->fetch_assoc()) {
+                if (!$userEmail || strcasecmp($lRow['email'], $userEmail) === 0) {
+                    $appliedDiscount = 10; // percent
+                    $finalPrice = round($total * 0.9, 2);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => 'Redeem code does not match this user email']);
+                    exit();
                 }
-                $lStmt->close();
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid loyalty redeem code']);
+                exit();
             }
+            $lStmt->close();
         }
 
         // Insert order including final_price

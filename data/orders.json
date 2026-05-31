@@ -16,7 +16,7 @@
       }
     ],
     "total": 8.5,
-    "status": "Pending",
+    "status": "Cancelled",
     "userId": null,
     "createdAt": "2026-05-24T18:03:02.664Z"
   },
@@ -37,7 +37,7 @@
       }
     ],
     "total": 9,
-    "status": "Pending",
+    "status": "Cancelled",
     "userId": null,
     "createdAt": "2026-05-24T18:03:47.895Z"
   }
