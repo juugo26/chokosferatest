@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Donut Sarajevo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    body {
+      background: #f5f5f5;
+      color: #0a0a0a;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 45px;
+      background: #ff3385;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar .brand-name {
+      font-size: 32px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .navbar-right {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .navbar-right span {
+      font-size: 16px;
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .nav-link-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-link-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .header {
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card h3 {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 800;
+      color: #ff3385;
+    }
+
+    .filters {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .filters h3 {
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group input,
+    .filter-group select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .filter-group button {
+      background: #ff3385;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    .filter-group button:hover {
+      background: #ff1f6f;
+    }
+
+    .orders-table {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .orders-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .orders-table th {
+      background: #f9f9f9;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      border-bottom: 1px solid #eee;
+    }
+
+    .orders-table td {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .orders-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .order-id {
+      font-weight: 600;
+      color: #ff3385;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-approved {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-rejected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .approve-btn,
+    .reject-btn,
+    .view-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .approve-btn {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .approve-btn:hover {
+      background: #c3e6cb;
+    }
+
+    .reject-btn {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .reject-btn:hover {
+      background: #f5c6cb;
+    }
+
+    .view-btn {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+
+    .view-btn:hover {
+      background: #d3d4d5;
+    }
+
+    .no-orders {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      font-size: 24px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .order-details {
+      margin-bottom: 20px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .detail-value {
+      color: #0a0a0a;
+    }
+
+    .items-list {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+
+    .item {
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .item-name {
+      font-weight: 600;
+    }
+
+    .item-price {
+      color: #ff3385;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .modal-actions button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .confirm-btn {
+      background: #ff3385;
+      color: white;
+    }
+
+    .confirm-btn:hover {
+      background: #ff1f6f;
+    }
+
+    .cancel-btn {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+
+    .cancel-btn:hover {
+      background: #d3d4d5;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .menu-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .menu-item-row:last-child { border-bottom: none; }
+
+    .menu-item-row-info { flex: 1; min-width: 160px; }
+    .menu-item-row-name { font-weight: 700; color: #0a0a0a; }
+    .menu-item-row-meta { font-size: 12px; color: #888; margin-top: 2px; }
+
+    .menu-item-row-actions { display: flex; gap: 6px; }
+
+    .edit-item-btn {
+      background: #e8f0fe;
+      color: #1a73e8;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .delete-item-btn {
+      background: #f8d7da;
+      color: #721c24;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Flatpickr Calendar Styling */
+    .flatpickr-calendar {
+      background: white;
+      box-shadow: 0 3px 13px rgba(0, 0, 0, 0.08);
+    }
+
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay,
+    .flatpickr-day.disabled,
+    .flatpickr-day.disabled:hover {
+      color: #ccc;
+      background: transparent;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .flatpickr-day.today {
+      border-color: #ff3385;
+    }
+
+    .flatpickr-day.selected {
+      background: #ff3385;
+      border-color: #ff3385;
+    }
+
+    .flatpickr-day:hover {
+      background: #f1f1f1;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <div class="brand-name">🍩 Donut Sarajevo — Admin</div>
+    <div class="navbar-right">
+      <a href="chokosfera.html" class="nav-link-btn"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="order.html" class="nav-link-btn"><i class="fa-solid fa-bag-shopping"></i> Orders</a>
+      <a href="logout.php" class="logout-btn">Logout</a>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Admin Dashboard</h1>
+      <p>Manage orders, items, and your shop content</p>
+    </div>
+
+    <!-- Add New Item Panel -->
+    <div class="filters" style="margin-bottom:30px;">
+      <h3 style="margin-bottom:18px;font-size:18px;color:#ff3385;">➕ Add New Menu Item</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end;">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;">Item Name</label>
+          <input id="newItemName" type="text" placeholder="e.g. Smash Cake" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;">Price (KM)</label>
+          <input id="newItemPrice" type="number" min="0" step="0.5" placeholder="e.g. 20" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;">Amount / Pack</label>
+          <input id="newItemAmount" type="text" placeholder="e.g. 16 pcs" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;">Description</label>
+          <input id="newItemDesc" type="text" placeholder="Short description..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;">
+        </div>
+        <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;">
+          <button onclick="addMenuItem()" style="background:#ff3385;color:white;border:none;padding:10px 24px;border-radius:5px;cursor:pointer;font-size:14px;font-weight:600;transition:0.3s;">Add Item</button>
+          <button onclick="clearNewItemForm()" style="background:#e2e3e5;color:#383d41;border:none;padding:10px 18px;border-radius:5px;cursor:pointer;font-size:14px;font-weight:600;transition:0.3s;">Clear</button>
+        </div>
+        <div id="addItemMsg" style="grid-column:1/-1;display:none;padding:10px 14px;border-radius:5px;font-size:14px;font-weight:600;"></div>
+      </div>
+    </div>
+
+    <!-- Existing Menu Items -->
+    <div class="filters" style="margin-bottom:30px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="font-size:18px;color:#ff3385;">📋 Menu Items</h3>
+        <button onclick="loadMenuItems()" style="background:#f1f1f1;border:none;padding:8px 14px;border-radius:5px;cursor:pointer;font-size:13px;">↻ Refresh</button>
+      </div>
+      <div id="menuItemsContainer">
+        <p style="color:#999;text-align:center;padding:20px;">Loading items...</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <h3>Total Orders</h3>
+        <div class="value" id="totalOrders">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Pending</h3>
+        <div class="value" id="pendingOrders">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Approved</h3>
+        <div class="value" id="approvedOrders">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Rejected</h3>
+        <div class="value" id="rejectedOrders">0</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <h3>Filters</h3>
+      <div class="filter-group">
+        <input type="date" id="fromDate" placeholder="From Date">
+        <input type="date" id="toDate" placeholder="To Date">
+        <select id="statusFilter">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button onclick="applyFilters()">Apply Filters</button>
+        <button onclick="clearFilters()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="orders-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer Email</th>
+            <th>Order Date</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+          <tr>
+            <td colspan="6" class="loading">Loading orders...</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="noOrders" class="no-orders" style="display: none;">
+        No orders found
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div id="orderModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Order Details</h2>
+        <button class="close-modal" onclick="closeOrderModal()">&times;</button>
+      </div>
+      <div class="order-details">
+        <div class="detail-row">
+          <span class="detail-label">Order ID:</span>
+          <span class="detail-value" id="modalOrderId">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Customer Email:</span>
+          <span class="detail-value" id="modalCustomerEmail">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Order Date:</span>
+          <span class="detail-value" id="modalOrderDate">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Status:</span>
+          <span class="detail-value" id="modalStatus">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Items:</span>
+        </div>
+        <div class="items-list" id="modalItems">
+          <!-- Items will be populated here -->
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Total:</span>
+          <span class="detail-value" id="modalTotal">-</span>
+        </div>
+      </div>
+      <div class="modal-actions" id="modalActions">
+        <!-- Action buttons will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = (function() {
+      var h = window.location.hostname, p = window.location.port;
+      if ((h === 'localhost' || h === '127.0.0.1') && p !== '3000') return 'http://localhost:3000';
+      return '';
+    })();
+
+    let allOrders = [];
+    let filteredOrders = [];
+
+    // ── MENU ITEMS ──────────────────────────────────────────────────────────────
+    const MENU_STORAGE_KEY = 'chokosfera_adminMenuItems';
+
+    function loadMenuItems() {
+      const container = document.getElementById('menuItemsContainer');
+      let items = getStoredItems();
+      if (items.length === 0) {
+        container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No custom items added yet. Use the form above to add items.</p>';
+        return;
+      }
+      container.innerHTML = items.map((item, idx) => `
+        <div class="menu-item-row">
+          <div class="menu-item-row-info">
+            <div class="menu-item-row-name">${escHtml(item.name)}</div>
+            <div class="menu-item-row-meta">${escHtml(item.amount || '')}${item.amount ? ' · ' : ''}${escHtml(String(item.price))} KM${item.description ? ' · ' + escHtml(item.description) : ''}</div>
+          </div>
+          <div class="menu-item-row-actions">
+            <button class="edit-item-btn" onclick="editMenuItem(${idx})">Edit</button>
+            <button class="delete-item-btn" onclick="deleteMenuItem(${idx})">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getStoredItems() {
+      try { return JSON.parse(localStorage.getItem(MENU_STORAGE_KEY) || '[]'); } catch(e) { return []; }
+    }
+
+    function saveStoredItems(items) {
+      localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function addMenuItem() {
+      const name = document.getElementById('newItemName').value.trim();
+      const price = parseFloat(document.getElementById('newItemPrice').value);
+      const amount = document.getElementById('newItemAmount').value.trim();
+      const desc = document.getElementById('newItemDesc').value.trim();
+      const msg = document.getElementById('addItemMsg');
+
+      if (!name) return showItemMsg('Item name is required.', 'error');
+      if (isNaN(price) || price < 0) return showItemMsg('Please enter a valid price.', 'error');
+
+      const items = getStoredItems();
+      items.push({ name, price, amount, description: desc });
+      saveStoredItems(items);
+      showItemMsg(`"${name}" added successfully!`, 'success');
+      clearNewItemForm();
+      loadMenuItems();
+    }
+
+    function editMenuItem(idx) {
+      const items = getStoredItems();
+      const item = items[idx];
+      if (!item) return;
+      const newName = prompt('Item name:', item.name);
+      if (newName === null) return;
+      const newPrice = prompt('Price (KM):', item.price);
+      if (newPrice === null) return;
+      const newAmount = prompt('Amount / Pack:', item.amount || '');
+      if (newAmount === null) return;
+      const newDesc = prompt('Description:', item.description || '');
+      if (newDesc === null) return;
+      items[idx] = { name: newName.trim(), price: parseFloat(newPrice) || 0, amount: newAmount.trim(), description: newDesc.trim() };
+      saveStoredItems(items);
+      loadMenuItems();
+    }
+
+    function deleteMenuItem(idx) {
+      if (!confirm('Delete this item?')) return;
+      const items = getStoredItems();
+      items.splice(idx, 1);
+      saveStoredItems(items);
+      loadMenuItems();
+    }
+
+    function clearNewItemForm() {
+      ['newItemName','newItemPrice','newItemAmount','newItemDesc'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+    }
+
+    function showItemMsg(text, type) {
+      const el = document.getElementById('addItemMsg');
+      el.textContent = text;
+      el.style.display = 'block';
+      el.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+      el.style.color = type === 'success' ? '#155724' : '#721c24';
+      setTimeout(() => { el.style.display = 'none'; }, 3000);
+    }
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── ORDERS ───────────────────────────────────────────────────────────────────
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadOrders();
+      loadMenuItems();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('toDate').value = today;
+    });
+
+    async function loadOrders() {
+      try {
+        const response = await fetch(API + '/api/orders');
+        const data = await response.json();
+        // Backend returns array directly (no .success wrapper)
+        allOrders = Array.isArray(data) ? data : (data.orders || []);
+        filteredOrders = allOrders;
+        renderOrders();
+        updateStats();
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        document.getElementById('ordersBody').innerHTML =
+          '<tr><td colspan="6" class="no-orders">Error loading orders. Make sure the server is running.</td></tr>';
+      }
+    }
+
+    function getOrderStatus(order) {
+      if (order.status === 'Approved') return 'approved';
+      if (order.status === 'Rejected' || order.status === 'Cancelled') return 'rejected';
+      return 'pending';
+    }
+
+    function renderOrders() {
+      const tbody = document.getElementById('ordersBody');
+      const noOrders = document.getElementById('noOrders');
+
+      if (filteredOrders.length === 0) {
+        tbody.innerHTML = '';
+        noOrders.style.display = 'block';
+        return;
+      }
+
+      noOrders.style.display = 'none';
+      tbody.innerHTML = [...filteredOrders].reverse().map(order => {
+        const status = getOrderStatus(order);
+        const statusClass = `status-${status}`;
+        const orderDate = order.orderDate || (order.createdAt ? order.createdAt.split('T')[0] : 'N/A');
+        const itemNames = (order.items || []).map(i => i.name).join(', ') || '—';
+
+        return `
+          <tr>
+            <td class="order-id">#${String(order.id).slice(-6)}</td>
+            <td>${escHtml(order.userId || 'Guest')}</td>
+            <td>${escHtml(orderDate)}</td>
+            <td>${Number(order.total || 0).toFixed(2)} KM</td>
+            <td><span class="status-badge ${statusClass}">${status}</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="view-btn" onclick="viewOrder('${order.id}')">View</button>
+                ${status === 'pending' ? `
+                  <button class="approve-btn" onclick="confirmApprove('${order.id}')">✓ Approve</button>
+                  <button class="reject-btn" onclick="confirmReject('${order.id}')">✕ Reject</button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewOrder(orderId) {
+      const order = allOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const status = getOrderStatus(order);
+      const orderDate = order.orderDate || (order.createdAt ? order.createdAt.split('T')[0] : 'N/A');
+
+      document.getElementById('modalOrderId').textContent = '#' + String(orderId).slice(-6);
+      document.getElementById('modalCustomerEmail').textContent = order.userId || 'Guest';
+      document.getElementById('modalOrderDate').textContent = orderDate;
+      document.getElementById('modalStatus').textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+      const itemsHtml = (order.items || []).map(item => `
+        <div class="item">
+          <span class="item-name">${escHtml(item.name)}</span>
+          <span class="item-price">${Number(item.price || 0).toFixed(2)} KM × ${item.amount || 1}</span>
+        </div>
+      `).join('');
+      document.getElementById('modalItems').innerHTML = itemsHtml || '<p>No items</p>';
+      document.getElementById('modalTotal').textContent = Number(order.total || 0).toFixed(2) + ' KM';
+
+      const modalActions = document.getElementById('modalActions');
+      if (status === 'pending') {
+        modalActions.innerHTML = `
+          <button class="cancel-btn" onclick="closeOrderModal()">Close</button>
+          <button class="approve-btn" onclick="approveOrder('${orderId}')">✓ Approve</button>
+          <button class="reject-btn" onclick="rejectOrder('${orderId}')">✕ Reject</button>
+        `;
+      } else {
+        modalActions.innerHTML = `<button class="cancel-btn" onclick="closeOrderModal()">Close</button>`;
+      }
+
+      document.getElementById('orderModal').classList.add('active');
+    }
+
+    function closeOrderModal() {
+      document.getElementById('orderModal').classList.remove('active');
+    }
+
+    function confirmApprove(orderId) {
+      if (confirm('Approve this order?')) approveOrder(orderId);
+    }
+
+    function confirmReject(orderId) {
+      if (confirm('Reject this order?')) rejectOrder(orderId);
+    }
+
+    async function approveOrder(orderId) {
+      try {
+        // Update status in local store (backend only has cancel; extend with approve endpoint or patch status)
+        const response = await fetch(API + `/api/orders/${orderId}/approve`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Approved' })
+        });
+        // If backend doesn't yet have /approve, fall back to local update
+        if (!response.ok) {
+          updateOrderStatusLocally(orderId, 'Approved');
+        } else {
+          closeOrderModal();
+          loadOrders();
+        }
+      } catch (error) {
+        // Backend doesn't have the endpoint yet — update locally for UI
+        updateOrderStatusLocally(orderId, 'Approved');
+      }
+    }
+
+    async function rejectOrder(orderId) {
+      try {
+        const response = await fetch(API + `/api/orders/${orderId}/approve`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Rejected' })
+        });
+        if (!response.ok) {
+          updateOrderStatusLocally(orderId, 'Rejected');
+        } else {
+          closeOrderModal();
+          loadOrders();
+        }
+      } catch (error) {
+        updateOrderStatusLocally(orderId, 'Rejected');
+      }
+    }
+
+    function updateOrderStatusLocally(orderId, newStatus) {
+      const order = allOrders.find(o => o.id === orderId);
+      if (order) order.status = newStatus;
+      filteredOrders = allOrders;
+      closeOrderModal();
+      renderOrders();
+      updateStats();
+    }
+
+    function updateStats() {
+      const total = allOrders.length;
+      const pending = allOrders.filter(o => getOrderStatus(o) === 'pending').length;
+      const approved = allOrders.filter(o => getOrderStatus(o) === 'approved').length;
+      const rejected = allOrders.filter(o => getOrderStatus(o) === 'rejected').length;
+
+      document.getElementById('totalOrders').textContent = total;
+      document.getElementById('pendingOrders').textContent = pending;
+      document.getElementById('approvedOrders').textContent = approved;
+      document.getElementById('rejectedOrders').textContent = rejected;
+    }
+
+    function applyFilters() {
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+      const status = document.getElementById('statusFilter').value;
+
+      filteredOrders = allOrders.filter(order => {
+        let match = true;
+        const oDate = order.orderDate || (order.createdAt ? order.createdAt.split('T')[0] : null);
+        if (fromDate && oDate && oDate < fromDate) match = false;
+        if (toDate && oDate && oDate > toDate) match = false;
+        if (status && getOrderStatus(order) !== status) match = false;
+        return match;
+      });
+
+      renderOrders();
+    }
+
+    function clearFilters() {
+      document.getElementById('fromDate').value = '';
+      document.getElementById('toDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('statusFilter').value = '';
+      filteredOrders = allOrders;
+      renderOrders();
+    }
+
+    document.getElementById('orderModal').addEventListener('click', function(e) {
+      if (e.target === this) closeOrderModal();
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    // Initialize flatpickr for date range filters
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date();
+      
+      flatpickr('#fromDate', {
+        minDate: 'today',
+        disable: [
+          function(date) {
+            return date < today;
+          }
+        ]
+      });
+
+      flatpickr('#toDate', {
+        minDate: 'today',
+        disable: [
+          function(date) {
+            return date < today;
+          }
+        ]
+      });
+    });
+  </script>
+</body>
+</html>

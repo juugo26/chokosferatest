@@ -1,128 +1,170 @@
-<<<<<<< HEAD
-// order.js
+const API_BASE_URL = (function () {
+  var host = window.location.hostname;
+  var port = window.location.port;
+  if ((host === 'localhost' || host === '127.0.0.1') && port && port !== '3000') {
+    return 'http://localhost:3000';
+  }
+  if ((host === 'localhost' || host === '127.0.0.1') && !port) {
+    return 'http://localhost:3000';
+  }
+  return '';
+})();
 
 class Order {
-  constructor(id, items, total, status = 'Pending', userId = null) {
+  constructor(id, items, total, status = 'Pending', userId = null, createdAt = null) {
     this.id = id;
     this.items = items;
     this.total = total;
     this.status = status;
     this.userId = userId;
-    this.createdAt = new Date();
+    this.createdAt = createdAt || new Date().toISOString();
   }
 }
 
 class OrderRepository {
-  constructor() {
-    this.storageKey = 'chokosferaOrders';
+  async saveOrder(order) {
+    const res = await fetch(API_BASE_URL + '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        items: order.items, 
+        total: order.total, 
+        userId: order.userId, 
+        orderDate: order.orderDate,
+        email: order.email 
+      })
+    });
+    if (!res.ok) throw new Error('Failed to save order');
+    const data = await res.json();
+    return data.order;
   }
 
-  saveOrder(order) {
-    const orders = this.getAllOrders();
-    orders.push(order);
-    localStorage.setItem(this.storageKey, JSON.stringify(orders));
+  async getAllOrders() {
+    let userId = null;
+    try {
+      const saved = localStorage.getItem('chokosferaUser');
+      if (saved) userId = JSON.parse(saved).id;
+    } catch (e) {}
+    const url = userId ? API_BASE_URL + `/api/orders?userId=${userId}` : API_BASE_URL + '/api/orders';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Failed to fetch orders');
+    return await res.json();
   }
 
-  getAllOrders() {
-    const orders = localStorage.getItem(this.storageKey);
-    return orders ? JSON.parse(orders) : [];
-  }
-
-  updateOrder(updatedOrder) {
-    let orders = this.getAllOrders();
-    orders = orders.map(order => order.id === updatedOrder.id ? updatedOrder : order);
-    localStorage.setItem(this.storageKey, JSON.stringify(orders));
-  }
-
-  deleteOrder(orderId) {
-    let orders = this.getAllOrders();
-    orders = orders.filter(order => order.id !== orderId);
-    localStorage.setItem(this.storageKey, JSON.stringify(orders));
+  async cancelOrder(orderId) {
+    const res = await fetch(API_BASE_URL + `/api/orders/${orderId}/cancel`, { method: 'PATCH' });
+    if (!res.ok) throw new Error('Failed to cancel order');
+    return await res.json();
   }
 }
+
+const CART_STORAGE_KEY = 'chokosferaCart';
+
+const customOrderDefinitions = {
+  donuts: { label: 'Donuts', unitPrice: 5.0, min: 4, step: 4, packSize: 4 },
+  popsicles: { label: 'Cakestickles', unitPrice: 12.0, min: 4, step: 4, packSize: 4 },
+  heartPopsicles: { label: 'Heart Cakestickles', unitPrice: 12.0, min: 4, step: 4, packSize: 4 },
+  chocoStrawberries: { label: 'Choco Strawberries', unitPrice: 5.0, min: 5, step: 5, packSize: 5 },
+  chocoDates: { label: 'Choco Dates', unitPrice: 4.0, min: 5, step: 5, packSize: 5 },
+  smashCake: { label: 'Smash Cake', unitPrice: 40.0, min: 1, step: 1, packSize: 1 }
+};
 
 class OrderService {
   constructor(repository) {
     this.repository = repository;
-    this.cart = [];
-    this.points = 0; // Simple points tracking
+    this.cart = this.loadCart();
   }
 
-  // Related methods
+  loadCart() {
+    try {
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed.map(item => ({
+        name: item.name,
+        price: Number(item.price) || 0,
+        amount: Number(item.amount) || 1,
+        description: item.description,
+        customOrderData: item.customOrderData || null
+      })) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  saveCart() {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.cart));
+    } catch (error) {
+      // Ignore storage write failures.
+    }
+  }
+
   addToCart(item) {
-    this.cart.push(item);
-    console.log(`${item.name} added to cart.`);
+    const quantity = Number(item.amount) || 1;
+    const unitPrice = Number(item.price) || 0;
+    const normalizedItem = {
+      name: item.name,
+      price: quantity > 1 ? unitPrice : unitPrice,
+      amount: quantity,
+      description: item.description,
+      customOrderData: item.customOrderData || null
+    };
+    if (quantity > 1) {
+      normalizedItem.price = unitPrice * quantity;
+    } else {
+      normalizedItem.price = unitPrice;
+    }
+    this.cart.push(normalizedItem);
+    this.saveCart();
+  }
+
+  removeFromCart(index) {
+    if (index < 0 || index >= this.cart.length) return;
+    this.cart.splice(index, 1);
+    this.saveCart();
   }
 
   calculateTotal() {
-    return this.cart.reduce((total, item) => total + item.price, 0);
+    return this.cart.reduce((total, item) => total + Number(item.price || 0), 0);
   }
 
-  addPoints(amount) {
-    // 1 point per 10 currency units, for example
-    this.points += Math.floor(amount / 10);
-    console.log(`Added points. Total points: ${this.points}`);
-  }
-
-  redeemPoints(pointsToRedeem) {
-    if (this.points >= pointsToRedeem) {
-      this.points -= pointsToRedeem;
-      console.log(`Redeemed ${pointsToRedeem} points.`);
-      return true;
-    }
-    console.log('Not enough points.');
-    return false;
-  }
-
-  // Core Order methods
-  placeOrder(userId = null) {
-    if (this.cart.length === 0) {
-      throw new Error("Cart is empty");
-    }
-
+  async placeOrder(userId = null, orderDate = null, email = null) {
+    if (this.cart.length === 0) throw new Error("Cart is empty");
     const total = this.calculateTotal();
-    const newOrder = new Order(Date.now().toString(), [...this.cart], total, 'Pending', userId);
-    
-    this.repository.saveOrder(newOrder);
-    this.addPoints(total);
-    
-    // Clear cart after placing order
+    const order = new Order(null, [...this.cart], total, 'Pending', userId);
+    order.orderDate = orderDate || null;
+    order.email = email || null;
+    const saved = await this.repository.saveOrder(order);
     this.cart = [];
-    return newOrder;
+    this.saveCart();
+    return saved;
   }
 
-  cancelOrder(orderId) {
-    const orders = this.repository.getAllOrders();
-    const order = orders.find(o => o.id === orderId);
-    if (order) {
-      order.status = 'Cancelled';
-      this.repository.updateOrder(order);
-      console.log(`Order ${orderId} cancelled.`);
-    } else {
-      throw new Error("Order not found");
-    }
+  async cancelOrder(orderId) {
+    return await this.repository.cancelOrder(orderId);
   }
 
-  viewOrders() {
-    return this.repository.getAllOrders();
-  }
-
-  updateOrderStatus(orderId, newStatus) {
-    const orders = this.repository.getAllOrders();
-    const order = orders.find(o => o.id === orderId);
-    if (order) {
-      order.status = newStatus;
-      this.repository.updateOrder(order);
-      console.log(`Order ${orderId} status updated to ${newStatus}.`);
-    } else {
-      throw new Error("Order not found");
-    }
+  async viewOrders() {
+    return await this.repository.getAllOrders();
   }
 }
 
 class OrderController {
   constructor(service) {
     this.service = service;
+    this.customOrderControlsBound = false;
+    this.customOrderCounts = {
+      donuts: 0,
+      popsicles: 0,
+      heartPopsicles: 0,
+      chocoStrawberries: 0,
+      chocoDates: 0,
+      smashCake: 0
+    };
+    this.customOrderSummary = document.getElementById('customOrderSummary');
+    this.customOrderPriceValue = document.getElementById('customOrderPriceValue');
+    this.activeCustomOrderDraft = null;
   }
 
   addToCart(item) {
@@ -130,109 +172,324 @@ class OrderController {
     this.renderCart();
   }
 
-  calculateTotal() {
-    const total = this.service.calculateTotal();
-    console.log(`Current cart total: ${total}`);
-    return total;
+  removeFromCart(index) {
+    this.service.removeFromCart(index);
+    this.renderCart();
   }
 
-  placeOrder() {
+  calculateTotal() {
+    return this.service.calculateTotal();
+  }
+
+  getCurrentUserKey() {
+    try {
+      const saved = localStorage.getItem('chokosferaUser');
+      if (saved) {
+        const user = JSON.parse(saved);
+        if (user && user.id) return user.id;
+      }
+    } catch (error) {}
+    return 'guest';
+  }
+
+  getNextCustomOrderLabel() {
+    if (this.activeCustomOrderDraft && this.activeCustomOrderDraft.label) {
+      return this.activeCustomOrderDraft.label;
+    }
+    const userKey = this.getCurrentUserKey();
+    const storageKey = `chokosferaCustomOrderCounter_${userKey}`;
+    const currentCount = Number.parseInt(localStorage.getItem(storageKey) || '0', 10);
+    const nextCount = currentCount + 1;
+    localStorage.setItem(storageKey, String(nextCount));
+    return `Custom order #${nextCount}`;
+  }
+
+  calculateCustomOrderTotal() {
+    return Object.entries(this.customOrderCounts).reduce((total, [key, quantity]) => {
+      if (!quantity) return total;
+      const config = customOrderDefinitions[key];
+      if (!config) return total;
+      const groups = quantity / config.step;
+      return total + Number((groups * config.unitPrice).toFixed(2));
+    }, 0);
+  }
+
+  renderCustomOrderSummary() {
+    if (!this.customOrderSummary) return;
+    this.customOrderSummary.innerHTML = '';
+
+    const selectedItems = Object.entries(this.customOrderCounts).filter(([, quantity]) => quantity > 0);
+    if (selectedItems.length === 0) {
+      this.customOrderSummary.textContent = 'No items selected yet.';
+      return;
+    }
+
+    selectedItems.forEach(([key, quantity]) => {
+      const config = customOrderDefinitions[key];
+      if (!config) return;
+      const chip = document.createElement('div');
+      chip.className = 'summary-chip';
+      chip.innerHTML = `
+        <span>${config.label} x ${quantity}</span>
+        <button type="button" aria-label="Remove ${config.label}" data-remove-option="${key}">×</button>
+      `;
+      chip.querySelector('button').addEventListener('click', () => {
+        this.customOrderCounts[key] = 0;
+        this.syncCustomOrderUI();
+      });
+      this.customOrderSummary.appendChild(chip);
+    });
+  }
+
+  updateCustomOrderPriceDisplay() {
+    if (!this.customOrderPriceValue) return;
+    const total = this.calculateCustomOrderTotal();
+    this.customOrderPriceValue.textContent = `${total.toFixed(2)} KM`;
+  }
+
+  addCustomOrder() {
+    const notesField = document.getElementById('designNotes');
+    const notes = notesField ? notesField.value.trim() : '';
+    const selectedItems = [];
+    let summaryText = [];
+
+    Object.entries(customOrderDefinitions).forEach(([key, config]) => {
+      const quantity = Math.max(0, this.customOrderCounts[key] || 0);
+      if (quantity === 0) return;
+
+      const groups = quantity / config.step;
+      const linePrice = Number((groups * config.unitPrice).toFixed(2));
+      selectedItems.push({
+        name: config.label,
+        price: linePrice,
+        amount: quantity,
+        description: `Custom order selection`
+      });
+      summaryText.push(`${config.label} x ${quantity}`);
+    });
+
+    if (selectedItems.length === 0) {
+      alert('Select at least one item to add to the cart.');
+      return;
+    }
+
+    const customOrderLabel = this.getNextCustomOrderLabel();
+    const total = this.calculateCustomOrderTotal();
+    const description = [summaryText.join(', '), notes ? `Design notes: ${notes}` : null].filter(Boolean).join(' • ');
+    const customOrderData = {
+      counts: { ...this.customOrderCounts },
+      notes,
+      label: customOrderLabel,
+      total
+    };
+    this.service.addToCart({
+      name: customOrderLabel,
+      price: total,
+      amount: 1,
+      description,
+      customOrderData
+    });
+    this.renderCart();
+    this.resetCustomOrder();
+  }
+
+  restoreCustomOrder(index) {
+    const item = this.service.cart[index];
+    if (!item || !item.customOrderData) return;
+
+    const customOrderData = item.customOrderData;
+    this.customOrderCounts = {
+      donuts: Number(customOrderData.counts?.donuts) || 0,
+      popsicles: Number(customOrderData.counts?.popsicles) || 0,
+      heartPopsicles: Number(customOrderData.counts?.heartPopsicles) || 0,
+      chocoStrawberries: Number(customOrderData.counts?.chocoStrawberries) || 0,
+      chocoDates: Number(customOrderData.counts?.chocoDates) || 0,
+      smashCake: Number(customOrderData.counts?.smashCake) || 0
+    };
+
+    const notesField = document.getElementById('designNotes');
+    if (notesField) notesField.value = customOrderData.notes || '';
+
+    this.activeCustomOrderDraft = {
+      label: item.name,
+      counts: { ...this.customOrderCounts },
+      notes: customOrderData.notes || ''
+    };
+
+    this.service.removeFromCart(index);
+    this.syncCustomOrderUI();
+  }
+
+  resetCustomOrder() {
+    this.customOrderCounts = {
+      donuts: 0,
+      popsicles: 0,
+      heartPopsicles: 0,
+      chocoStrawberries: 0,
+      chocoDates: 0,
+      smashCake: 0
+    };
+    this.activeCustomOrderDraft = null;
+    this.syncCustomOrderUI();
+    const notesField = document.getElementById('designNotes');
+    if (notesField) notesField.value = '';
+  }
+
+  bindCustomOrderControls() {
+    if (this.customOrderControlsBound) return;
+
+    const controls = document.querySelectorAll('[data-action="increase"], [data-action="decrease"]');
+    controls.forEach((button) => {
+      button.addEventListener('click', () => {
+        const option = button.getAttribute('data-option');
+        if (!option || !customOrderDefinitions[option]) return;
+
+        const config = customOrderDefinitions[option];
+        const current = this.customOrderCounts[option] || 0;
+        const change = button.getAttribute('data-action') === 'increase' ? config.step : -config.step;
+        const nextValue = Math.max(0, current + change);
+        this.customOrderCounts[option] = nextValue;
+        this.syncCustomOrderUI();
+      });
+    });
+
+    const addButton = document.getElementById('addCustomOrderButton');
+    if (addButton) {
+      addButton.addEventListener('click', () => this.addCustomOrder());
+    }
+
+    const resetButton = document.getElementById('resetCustomOrderButton');
+    if (resetButton) {
+      resetButton.addEventListener('click', () => this.resetCustomOrder());
+    }
+
+    this.customOrderControlsBound = true;
+  }
+
+  syncCustomOrderUI() {
+    Object.entries(this.customOrderCounts).forEach(([key, value]) => {
+      const countElement = document.getElementById(`${key}Count`);
+      if (countElement) countElement.textContent = String(value);
+    });
+    this.renderCustomOrderSummary();
+    this.updateCustomOrderPriceDisplay();
+  }
+
+  async placeOrder() {
     try {
       let userId = null;
+      let email = null;
       try {
         const saved = localStorage.getItem('chokosferaUser');
         if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && parsed.id) userId = parsed.id;
+          const user = JSON.parse(saved);
+          userId = user.id;
+          email = user.email;
         }
-      } catch (e) {
-        console.warn('Could not read saved user', e);
-      }
+      } catch (e) {}
+      // read date from UI (if present)
+      let orderDate = null;
+      try {
+        const dateInput = document.getElementById('orderDate');
+        if (dateInput && dateInput.value) {
+          orderDate = dateInput.value; // format YYYY-MM-DD
+        }
+      } catch (e) {}
 
-      const order = this.service.placeOrder(userId);
-      console.log('Order placed successfully:', order);
-      this.viewOrders();
-      this.renderCart(); // Clear cart display
+      await this.service.placeOrder(userId, orderDate, email);
+      alert('Order placed successfully!');
+      this.renderCart();
+      await this.viewOrders();
     } catch (error) {
       alert('Failed to place order: ' + error.message);
-      console.error('Failed to place order:', error.message);
     }
   }
 
-  cancelOrder(orderId) {
+  async cancelOrder(orderId) {
     try {
-      this.service.cancelOrder(orderId);
-      this.viewOrders();
+      await this.service.cancelOrder(orderId);
+      await this.viewOrders();
     } catch (error) {
-      console.error(error.message);
+      alert('Failed to cancel order: ' + error.message);
     }
   }
 
-  viewOrders() {
-    const orders = this.service.viewOrders();
-    console.log("All Orders:", orders);
+  async viewOrders() {
+    const orders = await this.service.viewOrders();
     this.renderOrders(orders);
   }
 
-  updateOrderStatus(orderId, status) {
-    try {
-      this.service.updateOrderStatus(orderId, status);
-      this.viewOrders();
-    } catch (error) {
-      console.error(error.message);
-    }
-  }
-
-  addPoints(amount) {
-    this.service.addPoints(amount);
-  }
-
-  redeemPoints(points) {
-    this.service.redeemPoints(points);
-  }
-
-  // UI rendering methods
   renderCart() {
     const cartContainer = document.getElementById('cartContainer');
     if (!cartContainer) return;
-
     cartContainer.innerHTML = '';
     this.service.cart.forEach((item, index) => {
       const div = document.createElement('div');
       div.className = 'cart-item';
-      div.innerText = `${item.name} - ${item.price.toFixed(2)} KM`;
+      div.style.display = 'flex';
+      div.style.alignItems = 'center';
+      div.style.justifyContent = 'space-between';
+      div.style.gap = '12px';
+
+      const content = document.createElement('div');
+      content.style.flex = '1';
+      const quantity = Number(item.amount) || 1;
+      const totalPrice = Number(item.price) || 0;
+      const note = item.description ? ` • ${item.description}` : '';
+      content.innerText = `${item.name} x ${quantity} • ${totalPrice.toFixed(2)} KM${note}`;
+
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '8px';
+      actions.style.alignItems = 'center';
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'btn btn-secondary';
+      editBtn.textContent = 'Edit';
+      editBtn.onclick = () => this.restoreCustomOrder(index);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn btn-cancel';
+      removeBtn.textContent = 'Remove';
+      removeBtn.onclick = () => this.removeFromCart(index);
+
+      if (item.customOrderData) {
+        actions.append(editBtn, removeBtn);
+      } else {
+        actions.append(removeBtn);
+      }
+
+      div.append(content, actions);
       cartContainer.appendChild(div);
     });
-
-    const totalDiv = document.getElementById('cartTotal');
-    if (totalDiv) {
-      totalDiv.innerText = `Total: ${this.calculateTotal().toFixed(2)} KM`;
+    if (this.service.cart.length === 0) {
+      cartContainer.innerHTML = '<p style="color: #999;">Cart is empty.</p>';
     }
+    const totalDiv = document.getElementById('cartTotal');
+    if (totalDiv) totalDiv.innerText = `Total: ${this.calculateTotal().toFixed(2)} KM`;
   }
 
   renderOrders(orders) {
     const ordersContainer = document.getElementById('ordersContainer');
     if (!ordersContainer) return;
-
     ordersContainer.innerHTML = '';
-    
     if (orders.length === 0) {
       ordersContainer.innerHTML = '<p>No orders placed yet.</p>';
       return;
     }
-
-    // Display newest orders first
     [...orders].reverse().forEach(order => {
       const div = document.createElement('div');
       div.className = 'order-card';
-      
       const isPending = order.status === 'Pending';
       const itemsList = order.items.map(i => i.name).join(', ');
-
+      const displayDate = order.orderDate || (order.createdAt ? order.createdAt.split('T')[0] : 'N/A');
       div.innerHTML = `
-        <h3>Order #${order.id.slice(-6)}</h3>
+        <h3>Order #${String(order.id).slice(-6)}</h3>
+        <p><strong>Date:</strong> ${displayDate}</p>
         <p><strong>Items:</strong> ${itemsList}</p>
-        <p><strong>Total:</strong> ${order.total.toFixed(2)} KM</p>
+        <p><strong>Total:</strong> ${Number(order.total).toFixed(2)} KM</p>
         <p><strong>Status:</strong> <span style="color: ${order.status === 'Cancelled' ? 'red' : 'green'}">${order.status}</span></p>
         ${isPending ? `<button class="btn btn-cancel" onclick="appController.cancelOrder('${order.id}')">Cancel Order</button>` : ''}
       `;
@@ -241,254 +498,19 @@ class OrderController {
   }
 }
 
-// Initialize the application components
 const repository = new OrderRepository();
 const service = new OrderService(repository);
-=======
-// order.js
-
-class Order {
-  constructor(id, items, total, status = 'Pending', userId = null) {
-    this.id = id;
-    this.items = items;
-    this.total = total;
-    this.status = status;
-    this.userId = userId;
-    this.createdAt = new Date();
-  }
-}
-
-class OrderRepository {
-  constructor() {
-    this.storageKey = 'chokosferaOrders';
-  }
-
-  saveOrder(order) {
-    const orders = this.getAllOrders();
-    orders.push(order);
-    localStorage.setItem(this.storageKey, JSON.stringify(orders));
-  }
-
-  getAllOrders() {
-    const orders = localStorage.getItem(this.storageKey);
-    return orders ? JSON.parse(orders) : [];
-  }
-
-  updateOrder(updatedOrder) {
-    let orders = this.getAllOrders();
-    orders = orders.map(order => order.id === updatedOrder.id ? updatedOrder : order);
-    localStorage.setItem(this.storageKey, JSON.stringify(orders));
-  }
-
-  deleteOrder(orderId) {
-    let orders = this.getAllOrders();
-    orders = orders.filter(order => order.id !== orderId);
-    localStorage.setItem(this.storageKey, JSON.stringify(orders));
-  }
-}
-
-class OrderService {
-  constructor(repository) {
-    this.repository = repository;
-    this.cart = [];
-    this.points = 0; // Simple points tracking
-  }
-
-  // Related methods
-  addToCart(item) {
-    this.cart.push(item);
-    console.log(`${item.name} added to cart.`);
-  }
-
-  calculateTotal() {
-    return this.cart.reduce((total, item) => total + item.price, 0);
-  }
-
-  addPoints(amount) {
-    // 1 point per 10 currency units, for example
-    this.points += Math.floor(amount / 10);
-    console.log(`Added points. Total points: ${this.points}`);
-  }
-
-  redeemPoints(pointsToRedeem) {
-    if (this.points >= pointsToRedeem) {
-      this.points -= pointsToRedeem;
-      console.log(`Redeemed ${pointsToRedeem} points.`);
-      return true;
-    }
-    console.log('Not enough points.');
-    return false;
-  }
-
-  // Core Order methods
-  placeOrder(userId = null) {
-    if (this.cart.length === 0) {
-      throw new Error("Cart is empty");
-    }
-
-    const total = this.calculateTotal();
-    const newOrder = new Order(Date.now().toString(), [...this.cart], total, 'Pending', userId);
-    
-    this.repository.saveOrder(newOrder);
-    this.addPoints(total);
-    
-    // Clear cart after placing order
-    this.cart = [];
-    return newOrder;
-  }
-
-  cancelOrder(orderId) {
-    const orders = this.repository.getAllOrders();
-    const order = orders.find(o => o.id === orderId);
-    if (order) {
-      order.status = 'Cancelled';
-      this.repository.updateOrder(order);
-      console.log(`Order ${orderId} cancelled.`);
-    } else {
-      throw new Error("Order not found");
-    }
-  }
-
-  viewOrders() {
-    return this.repository.getAllOrders();
-  }
-
-  updateOrderStatus(orderId, newStatus) {
-    const orders = this.repository.getAllOrders();
-    const order = orders.find(o => o.id === orderId);
-    if (order) {
-      order.status = newStatus;
-      this.repository.updateOrder(order);
-      console.log(`Order ${orderId} status updated to ${newStatus}.`);
-    } else {
-      throw new Error("Order not found");
-    }
-  }
-}
-
-class OrderController {
-  constructor(service) {
-    this.service = service;
-  }
-
-  addToCart(item) {
-    this.service.addToCart(item);
-    this.renderCart();
-  }
-
-  calculateTotal() {
-    const total = this.service.calculateTotal();
-    console.log(`Current cart total: ${total}`);
-    return total;
-  }
-
-  placeOrder() {
-    try {
-      let userId = null;
-      try {
-        const saved = localStorage.getItem('chokosferaUser');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && parsed.id) userId = parsed.id;
-        }
-      } catch (e) {
-        console.warn('Could not read saved user', e);
-      }
-
-      const order = this.service.placeOrder(userId);
-      console.log('Order placed successfully:', order);
-      this.viewOrders();
-      this.renderCart(); // Clear cart display
-    } catch (error) {
-      alert('Failed to place order: ' + error.message);
-      console.error('Failed to place order:', error.message);
-    }
-  }
-
-  cancelOrder(orderId) {
-    try {
-      this.service.cancelOrder(orderId);
-      this.viewOrders();
-    } catch (error) {
-      console.error(error.message);
-    }
-  }
-
-  viewOrders() {
-    const orders = this.service.viewOrders();
-    console.log("All Orders:", orders);
-    this.renderOrders(orders);
-  }
-
-  updateOrderStatus(orderId, status) {
-    try {
-      this.service.updateOrderStatus(orderId, status);
-      this.viewOrders();
-    } catch (error) {
-      console.error(error.message);
-    }
-  }
-
-  addPoints(amount) {
-    this.service.addPoints(amount);
-  }
-
-  redeemPoints(points) {
-    this.service.redeemPoints(points);
-  }
-
-  // UI rendering methods
-  renderCart() {
-    const cartContainer = document.getElementById('cartContainer');
-    if (!cartContainer) return;
-
-    cartContainer.innerHTML = '';
-    this.service.cart.forEach((item, index) => {
-      const div = document.createElement('div');
-      div.className = 'cart-item';
-      div.innerText = `${item.name} - ${item.price.toFixed(2)} KM`;
-      cartContainer.appendChild(div);
-    });
-
-    const totalDiv = document.getElementById('cartTotal');
-    if (totalDiv) {
-      totalDiv.innerText = `Total: ${this.calculateTotal().toFixed(2)} KM`;
-    }
-  }
-
-  renderOrders(orders) {
-    const ordersContainer = document.getElementById('ordersContainer');
-    if (!ordersContainer) return;
-
-    ordersContainer.innerHTML = '';
-    
-    if (orders.length === 0) {
-      ordersContainer.innerHTML = '<p>No orders placed yet.</p>';
-      return;
-    }
-
-    // Display newest orders first
-    [...orders].reverse().forEach(order => {
-      const div = document.createElement('div');
-      div.className = 'order-card';
-      
-      const isPending = order.status === 'Pending';
-      const itemsList = order.items.map(i => i.name).join(', ');
-
-      div.innerHTML = `
-        <h3>Order #${order.id.slice(-6)}</h3>
-        <p><strong>Items:</strong> ${itemsList}</p>
-        <p><strong>Total:</strong> ${order.total.toFixed(2)} KM</p>
-        <p><strong>Status:</strong> <span style="color: ${order.status === 'Cancelled' ? 'red' : 'green'}">${order.status}</span></p>
-        ${isPending ? `<button class="btn btn-cancel" onclick="appController.cancelOrder('${order.id}')">Cancel Order</button>` : ''}
-      `;
-      ordersContainer.appendChild(div);
-    });
-  }
-}
-
-// Initialize the application components
-const repository = new OrderRepository();
-const service = new OrderService(repository);
->>>>>>> origin/darkyami
 const appController = new OrderController(service);
+
+function initializeOrderPage() {
+  appController.bindCustomOrderControls();
+  appController.syncCustomOrderUI();
+  appController.renderCart();
+  appController.viewOrders();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeOrderPage);
+} else {
+  initializeOrderPage();
+}
