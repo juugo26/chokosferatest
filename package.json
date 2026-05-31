@@ -1,0 +1,17 @@
+{
+  "name": "chokosfera-backend",
+  "version": "1.0.0",
+  "description": "Simple backend for Chokosfera (auth + static)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mysql2": "^3.22.3"
+  }
+}

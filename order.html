@@ -1,248 +1,408 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title>Chokosfera Orders</title>
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background: #fff7f0;
-      color: #333;
-      padding-bottom: 75px;
-    }
-
-    /* NAVBAR */
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 25px;
-      background: #ff69b4;
-      color: white;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .navbar h1 {
-      font-size: 28px;
-    }
-
-    .icons {
-      display: flex;
-      gap: 20px;
-    }
-
-    .icons a {
-      color: white;
-      text-decoration: none;
-      font-size: 22px;
-      transition: 0.3s;
-    }
-
-    .icons a:hover {
-      transform: scale(1.1);
-      color: #1eceff;
-    }
-
-    /* LAYOUT */
-    .container {
-      padding: 40px;
-      max-width: 1200px;
-      margin: auto;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-    }
-
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .panel {
-      background: white;
-      padding: 25px;
-      border-radius: 20px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .panel h2 {
-      color: #ff1493;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #ffd6e7;
-      padding-bottom: 10px;
-    }
-
-    /* BUTTONS */
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      background: #ff69b4;
-      color: white;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .btn:hover {
-      background: #ff1493;
-    }
-
-    .btn-cancel {
-      background: #ff4d4d;
-      margin-top: 10px;
-    }
-
-    .btn-cancel:hover {
-      background: #cc0000;
-    }
-
-    /* ITEMS */
-    .item-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .item-card:last-child {
-      border-bottom: none;
-    }
-
-    .item-info span {
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .item-info .price {
-      color: #ff1493;
-      margin-top: 5px;
-      font-size: 14px;
-    }
-
-    .cart-item {
-      padding: 10px;
-      border-bottom: 1px dashed #ccc;
-      font-size: 16px;
-    }
-
-    .order-card {
-      padding: 15px;
-      background: #fff7f0;
-      border: 2px solid #ffd6e7;
-      border-radius: 12px;
-      margin-bottom: 15px;
-    }
-
-    .order-card h3 {
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    .order-card p {
-      margin-bottom: 5px;
+    /* Reset and base font for all elements */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    /* Main page background and text color */
+    body { background: #fff7f0; color: #333; padding-bottom: 75px; }
+    /* Top navigation bar */
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: #ff69b4; color: white; position: sticky; top: 0; z-index: 1000; }
+    /* Navbar title: "🍩 Chokosfera Orders" */
+    .navbar h1 { font-size: 28px; }
+    /* Navbar icons container */
+    .icons { display: flex; gap: 20px; }
+    /* Navbar icon links (e.g., home icon) */
+    .icons a { color: white; text-decoration: none; font-size: 22px; transition: 0.3s; }
+    /* Navbar icon hover effect */
+    .icons a:hover { transform: scale(1.1); color: #1eceff; }
+    /* Main content container */
+    .container { padding: 40px; max-width: 1200px; margin: auto; }
+    /* Two-column grid for menu/cart */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    /* Responsive: grid becomes one column on small screens */
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    /* Panel for sections (menu, cart, etc.) */
+    .panel { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    /* Panel section titles (e.g., "Menu Options", "Your Cart") */
+    .panel h2 { color: #ff1493; margin-bottom: 20px; border-bottom: 2px solid #ffd6e7; padding-bottom: 10px; }
+    /* Main button style (e.g., Add to Cart, Place Order) */
+    .btn { padding: 10px 20px; border: none; background: #ff69b4; color: white; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 14px; font-weight: bold; }
+    /* Button hover effect */
+    .btn:hover { background: #ff1493; }
+    /* Secondary button style (e.g., Reset, Loyal Customer Register) */
+    .btn-secondary { background: #fff0f5; color: #ff1493; border: 1px solid #ffd6e7; }
+    /* Secondary button hover effect */
+    .btn-secondary:hover { background: #ffe0ef; color: #ff1493; }
+    /* Cancel button style (not used in main UI) */
+    .btn-cancel { background: #ff4d4d; margin-top: 10px; }
+    /* Cancel button hover effect */
+    .btn-cancel:hover { background: #cc0000; }
+    /* Custom order panel section */
+    .custom-order-panel { margin-bottom: 24px; }
+    /* Header for custom order section ("Build your custom order") */
+    .section-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+    /* Custom order section title ("Build your custom order") */
+    .section-header h2 { margin-bottom: 6px; border: none; padding: 0; }
+    /* Section copy/description under custom order title */
+    .section-copy { color: #666; max-width: 700px; line-height: 1.5; }
+    /* Eyebrow label: "Custom builder" */
+    .eyebrow { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: #ffe6f1; color: #ff1493; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+    /* Grid for custom order options */
+    .custom-order-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 18px; }
+    /* Responsive: custom order grid 2 columns on medium, 1 on small screens */
+    @media (max-width: 900px) { .custom-order-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .custom-order-grid { grid-template-columns: 1fr; } }
+    /* Card for each custom order option (Donuts, Cakestickles, etc.) */
+    .custom-option-card { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px; border-radius: 16px; border: 1px solid #ffd6e7; background: #fffaf8; min-height: 120px; }
+    /* Header row in custom option card (title, meta, quantity) */
+    .custom-option-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    /* Custom option card title (e.g., "Donuts", "Cakestickles") */
+    .custom-option-card h3 { color: #ff1493; font-size: 18px; margin-bottom: 4px; }
+    /* Meta info under custom option title (e.g., "Minimum 4 · step 4") */
+    .custom-option-meta { color: #8a5a6a; font-size: 12px; }
+    /* Quantity pill for custom option (shows count) */
+    .custom-quantity-pill { min-width: 34px; padding: 6px 9px; border-radius: 999px; background: #ff1493; color: white; font-size: 12px; font-weight: bold; text-align: center; }
+    /* Controls for increasing/decreasing quantity */
+    .custom-option-controls { display: flex; gap: 10px; }
+    /* Buttons inside custom option controls */
+    .custom-option-controls .btn { flex: 1; padding: 9px 12px; }
+    /* Summary of selected custom order items */
+    .custom-order-summary { margin: 0 0 16px; padding: 12px 14px; border-radius: 16px; border: 1px solid #ffd6e7; background: #fffaf8; }
+    /* Label for custom order summary: "Selected items" */
+    .custom-order-summary-label { display: block; margin-bottom: 10px; font-weight: bold; color: #ff1493; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; }
+    /* Track for summary chips (selected items) */
+    .summary-track { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+    /* Chip for each selected item in summary */
+    .summary-chip { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: white; border: 1px solid #ffd6e7; color: #333; padding: 8px 10px; font-size: 12px; font-weight: bold; flex: 0 0 auto; }
+    /* Remove button inside summary chip */
+    .summary-chip button { border: 0; background: #ff1493; color: white; border-radius: 999px; width: 18px; height: 18px; cursor: pointer; font-size: 12px; line-height: 1; }
+    /* Price preview display for custom order */
+    .price-display { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0 16px; padding: 12px 14px; border-radius: 12px; background: #fff0f5; border: 1px solid #ffd6e7; color: #ff1493; font-weight: bold; }
+    /* Label for design/flavor notes textarea */
+    .design-notes-label { display: block; font-weight: bold; margin-bottom: 10px; color: #333; }
+    /* Textarea for design/flavor notes */
+    .design-notes { width: 100%; border-radius: 12px; border: 1px solid #ffd6e7; padding: 12px 14px; font-size: 14px; resize: vertical; margin-bottom: 16px; }
+    /* Actions row for custom order (Add to cart, Reset) */
+    .custom-order-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    /* Layout for orders section: menu and cart columns */
+    .orders-layout { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 24px; }
+    /* Responsive: orders layout becomes one column on small screens */
+    @media (max-width: 768px) { .orders-layout { grid-template-columns: 1fr; } }
+    /* Card for each menu item in menu panel */
+    .item-card { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+    /* Remove border for last item card */
+    .item-card:last-child { border-bottom: none; }
+    /* Item name in menu card (e.g., "Donuts") */
+    .item-info span { font-weight: bold; font-size: 16px; }
+    /* Price in menu card (e.g., "3.00 KM") */
+    .item-info .price { color: #ff1493; margin-top: 5px; font-size: 14px; }
+    /* Cart item row (not used in main UI) */
+    .cart-item { padding: 10px; border-bottom: 1px dashed #ccc; font-size: 16px; }
+    /* Card for each order in order history */
+    .order-card { padding: 15px; background: #fff7f0; border: 2px solid #ffd6e7; border-radius: 12px; margin-bottom: 15px; }
+    /* Order card title (e.g., order number) */
+    .order-card h3 { margin-bottom: 10px; color: #333; }
+    /* Order card paragraph (order details) */
+    .order-card p { margin-bottom: 5px; }
+    /* flatpickr disabled-day style to show past dates crossed out */
+    .flatpickr-day.flatpickr-disabled,
+    .flatpickr-day.flatpickr-disabled:hover {
+      text-decoration: line-through;
+      color: #bdbdbd !important;
+      background: transparent !important;
+      cursor: not-allowed !important;
+      opacity: 0.6;
     }
   </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
-
 <body>
-
   <div class="navbar">
-    <div class="logo-center">
-      <h1>🍩 Chokosfera Orders</h1>
-    </div>
+    <h1>🍩 Chokosfera Orders</h1>
     <div class="icons">
-      <a href="chokosfera.html" title="Home"><i class="fa-solid fa-home"></i></a>
+      <a href="chokosfera.html" title="Home"><i class="fa-solid fa-house"></i></a>
+      <a href="order.html" title="Orders"><i class="fa-solid fa-bag-shopping"></i></a>
+      <a href="loyal_customer.html" title="Loyal Customer"><i class="fa-solid fa-crown"></i></a>
     </div>
   </div>
-
   <div class="container">
-    <div class="grid">
+    <section class="panel custom-order-panel">
+      <div class="section-header">
+        <div>
+          <span class="eyebrow">Custom builder</span>
+          <h2>Build your custom order</h2>
+          <p class="section-copy">Create your perfect selection. Choose from donuts, cakestickles, choco strawberries, choco dates, and smash cakes.</p>
+        </div>
+      </div>
+      <div class="custom-order-grid">
+        <article class="custom-option-card">
+          <div class="custom-option-header">
+            <div>
+              <h3>Donuts</h3>
+              <div class="custom-option-meta">Minimum 4 · step 4 · 5.00 KM</div>
+            </div>
+            <span class="custom-quantity-pill" id="donutsCount">0</span>
+          </div>
+          <div class="custom-option-controls">
+            <button class="btn btn-secondary" type="button" data-action="decrease" data-option="donuts">−</button>
+            <button class="btn" type="button" data-action="increase" data-option="donuts">+</button>
+          </div>
+        </article>
+        <article class="custom-option-card">
+          <div class="custom-option-header">
+            <div>
+              <h3>Cakestickles</h3>
+              <div class="custom-option-meta">Minimum 4 · step 4 · 12.00 KM</div>
+            </div>
+            <span class="custom-quantity-pill" id="popsiclesCount">0</span>
+          </div>
+          <div class="custom-option-controls">
+            <button class="btn btn-secondary" type="button" data-action="decrease" data-option="popsicles">−</button>
+            <button class="btn" type="button" data-action="increase" data-option="popsicles">+</button>
+          </div>
+        </article>
+        <article class="custom-option-card">
+          <div class="custom-option-header">
+            <div>
+              <h3>Heart Cakestickles</h3>
+              <div class="custom-option-meta">Minimum 4 · step 4 · 12.00 KM</div>
+            </div>
+            <span class="custom-quantity-pill" id="heartPopsiclesCount">0</span>
+          </div>
+          <div class="custom-option-controls">
+            <button class="btn btn-secondary" type="button" data-action="decrease" data-option="heartPopsicles">−</button>
+            <button class="btn" type="button" data-action="increase" data-option="heartPopsicles">+</button>
+          </div>
+        </article>
+        <article class="custom-option-card">
+          <div class="custom-option-header">
+            <div>
+              <h3>Choco Strawberries</h3>
+              <div class="custom-option-meta">Minimum 5 · step 5 · 5.00 KM</div>
+            </div>
+            <span class="custom-quantity-pill" id="chocoStrawberriesCount">0</span>
+          </div>
+          <div class="custom-option-controls">
+            <button class="btn btn-secondary" type="button" data-action="decrease" data-option="chocoStrawberries">−</button>
+            <button class="btn" type="button" data-action="increase" data-option="chocoStrawberries">+</button>
+          </div>
+        </article>
+        <article class="custom-option-card">
+          <div class="custom-oution-header">
+            <div>
+              <h3>Choco Dates</h3>
+              <div class="custom-option-meta">Minimum 5 · step 5 · 4.00 KM</div>
+            </div>
+            <span class="custom-quantity-pill" id="chocoDatesCount">0</span>
+          </div>
+          <div class="custom-option-controls">
+            <button class="btn btn-secondary" type="button" data-action="decrease" data-option="chocoDates">−</button>
+            <button class="btn" type="button" data-action="increase" data-option="chocoDates">+</button>
+          </div>
+        </article>
+        <article class="custom-option-card">
+          <div class="custom-option-header">
+            <div>
+              <h3>Smash Cake</h3>
+              <div class="custom-option-meta">Minimum 1 · step 1 · 40.00 KM</div>
+            </div>
+            <span class="custom-quantity-pill" id="smashCakeCount">0</span>
+          </div>
+          <div class="custom-option-controls">
+            <button class="btn btn-secondary" type="button" data-action="decrease" data-option="smashCake">−</button>
+            <button class="btn" type="button" data-action="increase" data-option="smashCake">+</button>
+          </div>
+        </article>
+      </div>
 
-      <!-- Menu Items -->
+      <div class="custom-order-summary" aria-live="polite">
+        <p class="custom-order-summary-label">Selected items</p>
+        <div class="summary-track" id="customOrderSummary">No items selected yet.</div>
+      </div>
+
+      <div class="price-display">
+        <span>Estimated price preview</span>
+        <strong id="customOrderPriceValue">0.00 KM</strong>
+      </div>
+
+      <label class="design-notes-label" for="designNotes">Design / flavor notes</label>
+      <textarea id="designNotes" class="design-notes" rows="5" placeholder="Describe the color palette, taste, filling, decorations, and any special requests."></textarea>
+
+      <div style="display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;">
+          <label class="design-notes-label" for="orderDate" style="margin-bottom:6px;">Choose date</label>
+          <input type="text" id="orderDate" class="flatpickr-input" placeholder="Select date" style="padding:10px;border-radius:10px;border:1px solid #ffd6e7;min-width:160px;" />
+        </div>
+        <div style="flex:1"></div>
+      </div>
+
+      <div class="custom-order-actions">
+        <button class="btn" type="button" id="addCustomOrderButton">Add custom order to cart</button>
+        <button class="btn btn-secondary" type="button" id="resetCustomOrderButton">Reset</button>
+      </div>
+    </section>
+
+    <div class="grid orders-layout">
       <div class="panel">
         <h2>Menu Options</h2>
-
         <div class="item-card">
-          <div class="item-info">
-            <span>Chocolate Dream</span>
-            <div class="price">3.00 KM</div>
-          </div>
-          <button class="btn" onclick="appController.addToCart({name: 'Chocolate Dream', price: 3.0})">Add to
-            Cart</button>
+          <div class="item-info"><span>Donuts</span><div class="price">3.00 KM</div></div>
+          <button class="btn" onclick="appController.addToCart({name: 'Donuts', price: 3.0, amount: 1, description: 'Available menu option'})">Add to Cart</button>
         </div>
-
         <div class="item-card">
-          <div class="item-info">
-            <span>Pink Strawberry</span>
-            <div class="price">3.00 KM</div>
-          </div>
-          <button class="btn" onclick="appController.addToCart({name: 'Pink Strawberry', price: 3.0})">Add to
-            Cart</button>
+          <div class="item-info"><span>Cakestickles</span><div class="price">4.00 KM</div></div>
+          <button class="btn" onclick="appController.addToCart({name: 'Cakestickles', price: 4.0, amount: 1, description: 'Available menu option'})">Add to Cart</button>
         </div>
-
         <div class="item-card">
-          <div class="item-info">
-            <span>Classic Glazed</span>
-            <div class="price">2.50 KM</div>
-          </div>
-          <button class="btn" onclick="appController.addToCart({name: 'Classic Glazed', price: 2.5})">Add to
-            Cart</button>
+          <div class="item-info"><span>Heart Cakestickles</span><div class="price">6.00 KM</div></div>
+          <button class="btn" onclick="appController.addToCart({name: 'Heart Cakestickles', price: 6.0, amount: 1, description: 'Available menu option'})">Add to Cart</button>
         </div>
-
+        <div class="item-card">
+          <div class="item-info"><span>Choco Strawberries</span><div class="price">5.00 KM</div></div>
+          <button class="btn" onclick="appController.addToCart({name: 'Choco Strawberries', price: 5.0, amount: 1, description: 'Available menu option'})">Add to Cart</button>
+        </div>
+        <div class="item-card">
+          <div class="item-info"><span>Choco Dates</span><div class="price">4.50 KM</div></div>
+          <button class="btn" onclick="appController.addToCart({name: 'Choco Dates', price: 4.5, amount: 1, description: 'Available menu option'})">Add to Cart</button>
+        </div>
+        <div class="item-card">
+          <div class="item-info"><span>Loyal Customer</span><div class="price">Free</div></div>
+          <a class="btn" href="loyal_customer.html">Register</a>
+        </div>
+        <div class="item-card">
+          <div class="item-info"><span>Smash Cake</span><div class="price">12.00 KM</div></div>
+          <button class="btn" onclick="appController.addToCart({name: 'Smash Cake', price: 12.0, amount: 1, description: 'Available menu option'})">Add to Cart</button>
+        </div>
       </div>
 
-      <!-- Cart -->
       <div class="panel">
         <h2>Your Cart</h2>
-        <div id="cartContainer">
-          <p style="color: #999;">Cart is empty.</p>
-        </div>
+        <div id="cartContainer"><p style="color: #999;">Cart is empty.</p></div>
+        <a class="btn btn-secondary" href="loyal_customer.html" style="display:inline-block;margin-bottom:16px;">Loyal Customer Register</a>
         <h3 id="cartTotal" style="margin-top: 20px; color: #ff1493; font-size: 20px;">Total: 0.00 KM</h3>
-        <button class="btn" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;"
-          onclick="appController.placeOrder()">Place Order</button>
+        <button class="btn" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="appController.placeOrder()">Place Order</button>
       </div>
-
     </div>
 
-    <!-- Orders -->
-    <div class="panel" style="margin-top: 40px;">
+    <section class="panel" style="margin-top: 24px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 style="margin-bottom: 0; border: none; padding: 0;">Order History</h2>
-        <button class="btn" onclick="appController.viewOrders()"><i class="fa-solid fa-rotate-right"></i>
-          Refresh</button>
+        <button class="btn" onclick="appController.viewOrders()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
       </div>
       <div id="ordersContainer"></div>
-    </div>
+    </section>
   </div>
-
-  <!-- Load the Order Architecture JS -->
   <script src="order.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
-    // Initial view load
     document.addEventListener("DOMContentLoaded", () => {
+      appController.renderCart();
       appController.viewOrders();
+      // Try server-side session first, then fallback to localStorage
+      try {
+        fetch('session_user.php', { credentials: 'same-origin' })
+          .then(function(res){ if (!res.ok) throw new Error('no-session'); return res.json(); })
+          .then(function(data){
+            if (data && data.success && data.username) {
+              try { localStorage.setItem('chokosferaUser', JSON.stringify({ username: data.username })); } catch (e) {}
+              const icons = document.querySelector('.icons');
+              if (icons) {
+                const span = document.createElement('span');
+                span.style.cssText = 'margin-right:12px;font-weight:bold;color:#fff;';
+                span.innerText = `Hi, ${data.username}`;
+                icons.insertBefore(span, icons.firstChild);
+              }
+              return;
+            }
+            // fallback to localStorage
+            const saved = localStorage.getItem('chokosferaUser');
+            if (saved) {
+              const user = JSON.parse(saved);
+              const icons = document.querySelector('.icons');
+              if (icons && user && user.username) {
+                const span = document.createElement('span');
+                span.style.cssText = 'margin-right:12px;font-weight:bold;color:#fff;';
+                span.innerText = `Hi, ${user.username}`;
+                icons.insertBefore(span, icons.firstChild);
+              }
+            }
+          })
+          .catch(function(){
+            try {
+              const saved = localStorage.getItem('chokosferaUser');
+              if (saved) {
+                const user = JSON.parse(saved);
+                const icons = document.querySelector('.icons');
+                if (icons && user && user.username) {
+                  const span = document.createElement('span');
+                  span.style.cssText = 'margin-right:12px;font-weight:bold;color:#fff;';
+                  span.innerText = `Hi, ${user.username}`;
+                  icons.insertBefore(span, icons.firstChild);
+                }
+              }
+            } catch (e) {}
+            // set default order date to today (format YYYY-MM-DD)
+            try {
+              const dateInput = document.getElementById('orderDate');
+              if (dateInput && !dateInput.value) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+              }
+            } catch (e) {}
+          });
+      } catch (e) {
+        try {
+          const saved = localStorage.getItem('chokosferaUser');
+          if (saved) {
+            const user = JSON.parse(saved);
+            const icons = document.querySelector('.icons');
+            if (icons && user && user.username) {
+              const span = document.createElement('span');
+              span.style.cssText = 'margin-right:12px;font-weight:bold;color:#fff;';
+              span.innerText = `Hi, ${user.username}`;
+              icons.insertBefore(span, icons.firstChild);
+            }
+          }
+        } catch (e) {}
+      }
     });
   </script>
-
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      try {
+        if (typeof flatpickr !== 'undefined') {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          flatpickr('#orderDate', {
+            dateFormat: 'Y-m-d',
+            minDate: today,
+            defaultDate: today,
+            onDayCreate: function(dObj, dStr, fp, dayElem) {
+              const dayDate = dayElem.dateObj;
+              if (dayDate < today) {
+                dayElem.classList.add('flatpickr-disabled');
+                dayElem.style.textDecoration = 'line-through';
+                dayElem.style.color = '#bdbdbd';
+                dayElem.style.cursor = 'not-allowed';
+                dayElem.style.opacity = '0.6';
+                dayElem.style.pointerEvents = 'none';
+              }
+            }
+          });
+        }
+      } catch (e) {
+        // ignore flatpickr init errors
+      }
+    });
+  </script>
 </body>
-
 </html>
+```

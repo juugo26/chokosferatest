@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;700&display=swap');
+body, .navbar, .brand-name, .menu-item-name, .menu-packets-heading, .menu-overlay-title, .dropdown-item, .about-address, .about-contact-row, .about-contact-note, .menu-item-card, .menu-item-meta, .menu-item-description, .menu-item-action, .menu-item-action-primary, .menu-item-action-secondary, .menu-item-card--featured, .menu-item-card--featured .menu-item-meta, .menu-item-card--featured .menu-item-name, .menu-item-card--featured .menu-item-description, .menu-item-card--featured .menu-item-featured-actions {
+  font-family: 'Fredoka', sans-serif !important;
+}
+
+/* Exclude Fredoka for login/register modal and order page */
+.modal, .modal * {
+  font-family: 'Playfair Display', serif !important;
+}
+
+/* Exclude Fredoka for order page if needed (order.html) */
+body.order-page, body.order-page * {
+  font-family: 'Playfair Display', serif !important;
+}

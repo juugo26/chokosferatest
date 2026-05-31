@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loyal Customer Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      color: #333;
+      padding: 24px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    .field textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    button {
+      background: #0078d4;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005a9e;
+    }
+    .note {
+      margin-top: 12px;
+      color: #555;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Loyal Customer Form</h1>
+    <p>Please fill out this form to register loyal customer details. This page is set up for future frontend connection.</p>
+
+    <form id="loyalCustomerForm">
+      <div class="field">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" name="firstName" placeholder="Enter first name" required />
+      </div>
+
+      <div class="field">
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" name="lastName" placeholder="Enter last name" required />
+      </div>
+
+      <div class="field">
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter age" required />
+      </div>
+
+      <div class="field">
+        <label for="occupation">Occupation</label>
+        <input type="text" id="occupation" name="occupation" placeholder="Enter occupation" required />
+      </div>
+
+      <div class="field">
+        <label for="customerId">Customer ID</label>
+        <input type="text" id="customerId" name="customerId" placeholder="Enter customer ID" required />
+      </div>
+
+      <div class="field">
+        <label for="membershipYears">Membership Length</label>
+        <select id="membershipYears" name="membershipYears" required>
+          <option value="">Select years with us</option>
+          <option value="0-1">0-1 year</option>
+          <option value="1-3">1-3 years</option>
+          <option value="3-5">3-5 years</option>
+          <option value="5+">5+ years</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="favoriteProduct">Favorite Product or Service</label>
+        <input type="text" id="favoriteProduct" name="favoriteProduct" placeholder="Enter favorite product or service" />
+      </div>
+
+      <div class="field">
+        <label for="notes">Additional Notes</label>
+        <textarea id="notes" name="notes" placeholder="Any extra details or feedback"></textarea>
+      </div>
+
+      <button type="submit">Save Loyal Customer</button>
+    </form>
+
+    <p class="note">Note: This form is currently static and ready for frontend integration later.</p>
+  </div>
+</body>
+</html>
